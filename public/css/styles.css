@@ -1,0 +1,41 @@
+.card-img-top {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.container-fluid {
+    margin-top: 2em;
+}
+
+
+
+@media (min-width: 769px){
+
+    input {
+        width: 514px !important;
+    }
+
+    ul {
+        margin-right: 5em;
+    }
+
+}
+
+
+@media (max-width: 768px) {
+
+    input {
+        width: 370px !important;
+    }
+
+    ul {
+        margin-right: 5em;
+    }
+
+}
+
+.dropdown-menu {
+    position: absolute !important;
+}
+

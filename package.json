@@ -1,0 +1,23 @@
+{
+  "name": "weather",
+  "version": "1.0.0",
+  "description": "A weather forcast application built with openweathermap",
+  "main": "dist/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "weather"
+  ],
+  "author": "Derek Reeter",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "express": "^4.18.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^16.11.45",
+    "typescript": "^4.7.4"
+  }
+}
