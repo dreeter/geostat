@@ -28,9 +28,10 @@
                 </ul>
       </nav>
 
-      <form class="form-inline mr-3 ml-3">
+      <form method="post" action="/search" class="form-inline mr-3 ml-3" autocomplete="off">
         <div class="form-group mx-sm-3 mb-2">
-          <input type="search" class="form-control" id="searchInput" placeholder="City, Country">
+          <input type="search" class="form-control" name="searchInput" id="cityCountryInput" placeholder="City, Country">
+          <input type="search" class="form-control" name="coordInput" id="coordInput" placeholder="lat, lon (decimal degrees)">
         </div>
         <button type="submit" class="btn btn-secondary mb-2">Search</button>
       </form>
