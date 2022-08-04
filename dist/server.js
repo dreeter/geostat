@@ -43,7 +43,9 @@ const _ = __importStar(require("lodash"));
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.urlencoded({ extended: true }));
 const port = 3000;
-let cityCountry = [];
+let searchableLocations = [];
+let userLocation = {};
+let userIPInfo = {};
 app.use(express_1.default.static('public'));
 app.set("view engine", "ejs");
 function getAPIInfo(url, requestType) {
@@ -78,48 +80,81 @@ function getAPIInfo(url, requestType) {
         }
     });
 }
-function formatInformation(data) {
-    const info = [
-        {
-            cardTitle: "Weather",
-            listItemOne: "Temperature: " + data[1].main.temp,
-            listItemTwo: "Description: " + data[1].weather.description
-        }
-    ];
-    return info;
+function convertUTCToTime(UTCDate) {
+    const date = new Date();
+    date.setUTCSeconds(UTCDate);
+    return date.toTimeString().substring(0, 17);
 }
-function getInformation(ipAddress, city, country, lat, lon) {
+function formatWeatherInfo(data) {
+    let cards = [];
+    const weatherCard = {
+        cardTitle: "Weather",
+        itemList: [
+            data.weather[0].description,
+            "Temperature: " + data.main.temp,
+            "Temp-Minimum: " + data.main.temp_min,
+            "Temp-Maximum: " + data.main.temp_max,
+            "Humidity : " + data.main.humidity
+        ]
+    };
+    const timeZoneCard = {
+        cardTitle: "Time-Zone",
+        itemList: [
+            data.name + ", " + data.sys.country,
+            "Latitude: " + data.coord.lat,
+            "Longitude: " + data.coord.lon,
+            "Sunrise: " + convertUTCToTime(data.sys.sunrise),
+            "Sunset: " + convertUTCToTime(data.sys.sunset)
+        ]
+    };
+    const atmosphereCard = {
+        cardTitle: "Atmosphere",
+        itemList: [
+            "Wind Speed: " + data.wind.speed,
+            "Wind Direction: " + data.wind.deg,
+            "Pressure: " + data.main.pressure,
+            "Visibility: " + data.visibility,
+            "Cloudiness: " + data.clouds.all
+        ]
+    };
+    cards.push(timeZoneCard);
+    cards.push(weatherCard);
+    cards.push(atmosphereCard);
+    return cards;
+}
+function getAllAPIInfo(ipAddress, city, country, lat, lon) {
     return __awaiter(this, void 0, void 0, function* () {
-        let ipInfo = {};
         if (ipAddress !== "") {
             const ipURL = "http://ip-api.com/json/" + ipAddress;
-            ipInfo = (yield getAPIInfo(ipURL, "http"));
-            city = ipInfo.city;
-            country = ipInfo.country;
-            lat = ipInfo.lat;
-            lon = ipInfo.lon;
+            userIPInfo = (yield getAPIInfo(ipURL, "http"));
+            userLocation.city = userIPInfo.city;
+            userLocation.country = userIPInfo.country;
+            userLocation.latitude = userIPInfo.lat;
+            userLocation.longitude = userIPInfo.lon;
+            userLocation.regionName = userIPInfo.regionName;
         }
-        const apiKey = "APIKEYHERE";
-        const weatherURL = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&userCountry=" + country + "&appid=" + apiKey + "&units=imperial";
+        const apiKey = "APIKEY";
+        const weatherURL = "https://api.openweathermap.org/data/2.5/weather?q=" + (city || String(userLocation.city)) + "&userCountry=" + (country || String(userLocation.country)) + "&appid=" + apiKey + "&units=imperial";
         const weatherInfo = yield getAPIInfo(weatherURL, "https");
         if (lat === 0 && lon === 0) {
             lat = weatherInfo.coord.lat;
             lon = weatherInfo.coord.lon;
         }
-        const geoURL = "https://macrostrat.org/api/geologic_units/map?lat=" + lat + "&lng=" + lon;
+        const geoURL = "https://macrostrat.org/api/geologic_units/map?lat=" + (lat || String(userLocation.latitude)) + "&lng=" + (lon || String(userLocation.longitude));
         const geoInfo = yield getAPIInfo(geoURL, "https");
-        return [ipInfo, weatherInfo, geoInfo];
+        const apiInfo = { userIPInfo, weatherInfo, geoInfo };
+        return apiInfo;
     });
 }
 app.get("/", (_req, _res) => {
     let ipAddress = _req.socket.remoteAddress;
     ipAddress = "24.48.0.1";
     if (ipAddress) {
-        getInformation(ipAddress)
-            .then((_data) => {
-            console.log(_data);
-            const info = formatInformation(_data);
-            _res.render("home", { info: info });
+        getAllAPIInfo(ipAddress, "", "", 0, 0)
+            .then((data) => {
+            console.log(data);
+            const cards = formatWeatherInfo(data.weatherInfo);
+            _res.render("home", { cards: cards });
         })
             .catch((error) => {
             console.log("There was an error: " + error);
@@ -140,11 +175,11 @@ app.post("/search", (_req, _res) => {
         lat = Number(coords[0]);
         lon = Number(coords[1]);
     }
-    getInformation(ipAddress, city, country, lat, lon)
+    getAllAPIInfo(ipAddress, city, country, lat, lon)
         .then((data) => {
         console.log(data);
-        let info = formatInformation(data);
-        _res.render("home", { info: info });
+        const cards = formatWeatherInfo(data.weatherInfo);
+        _res.render("home", { cards: cards });
     })
         .catch((error) => {
         console.log("There was an error: " + error);
@@ -154,10 +189,13 @@ app.listen(port, () => {
     const countriesNowURL = "https://countriesnow.space/api/v0.1/countries";
     getAPIInfo(countriesNowURL, "https")
         .then((data) => {
-        data.data.forEach((obj) => {
-            for (let i = 0; i < obj.cities.length; i++) {
-                const input = obj.cities[i] + "," + obj.country;
-                cityCountry.push(_.replace(input, "\s", ""));
+        data.data.forEach((location) => {
+            for (let i = 0; i < location.cities.length; i++) {
+                const locationToInsert = {
+                    city: location.cities[i],
+                    country: location.country
+                };
+                searchableLocations.push(locationToInsert);
             }
         });
     })

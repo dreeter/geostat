@@ -1,33 +1,44 @@
 <%- include("partials/header"); -%>
+        
 
     <!-- Boostrap Grid for Display of Weather Data -->
     <div class="container-fluid">
 
-        <h1>Location</h1>
+      <h1>Location</h1>
 
-        <div class="row justify-content-center">
-            <div class="col-xl-4">
-                <div class="card mb-3 text-white bg-secondary">
-                    <div class="row no-gutters">
-                      <div class="col-3">
-                        <img src="images/cloud.png" class="card-img-top img-fluid" alt="...">
-                      </div>
-                      <div class="col-9">
-                        <div class="card-body">
-                          <h5 class="card-title"><%=info[0].cardTitle%></h5>
-                          <ul>
-                            <li><%=info[0].listItemOne%></li>
-                            <li><%=info[0].listItemTwo%></li>
-                          </ul>
-                          <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-                          <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                        </div>
+      <div class="row justify-content-center">
+
+        <% cards.forEach((card)=>{ %>
+
+          <div class="col-xl-4">
+              <div class="card mb-3 text-white bg-secondary">
+                  <div class="row no-gutters">
+                    <div class="col-3">
+                      <img src="images/cloud.png" class="card-img-top img-fluid" alt="...">
+                    </div>
+                    <div class="col-9">
+                      <div class="card-body">
+                        <h5 class="card-title"><%=card.cardTitle%></h5>
+                        <ul>
+                          <% card.itemList.forEach((item)=>{ %>
+                            <li><%=item%></li>
+                          <% }); %>
+                        </ul>
+                        <!-- <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+                        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p> -->
                       </div>
                     </div>
                   </div>
-              </div>
-        </div>
+                </div>
+            </div>
+
+        <% }); %>
+
       </div>
+    </div>
+
+
+
     
 
-      <%- include("partials/footer"); -%>
+<%- include("partials/footer"); -%>

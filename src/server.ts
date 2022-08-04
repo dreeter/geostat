@@ -4,6 +4,7 @@ import https from "https";
 import { IncomingMessage } from "http";
 import * as http from "http";
 import * as _ from "lodash";
+import {IPInfo, Location, WeatherInfo, GeoInfo, Card} from "./types"
 
 const app = express();
 
@@ -11,76 +12,10 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const port: number = 3000;
 
-// type Countries = {
-//     error: boolean;
-//     msg: string;
-//     data: [{
-//         iso2: string;
-//         iso3: string;
-//         country: string;
-//         cities: [string];
-//     }]
-// }
 
-type IPInfo = {
-   status: string,
-   country: string,
-   countryCode: string,
-   region: string,
-   regionName: string,
-   city: string,
-   zip: string,
-   lat: number,
-   lon: number,
-   timezone: string,
-   isp: string,
-   org: string,
-   as: string,
-   query: string
-}
-
-// type Location = {
-//     city: string,
-//     country: string,
-//     lat: number,
-//     lng: number
-// }
-
-// type Weather = {
-//     main: {
-//         temp: number,
-//         feels_like: number,
-//         temp_min: number,
-//         temp_max: number,
-//         pressure: number,
-//         humidity: number
-//     }
-// }
-
-// type GeoInfo = {
-//     name: string
-// }
-
-
-// let countries = {} as Countries;
-
-
-
-type CityCountry = string[];
-
-// type UserInfo = {
-//     city: string,
-//     country: string,
-//     latitude: number,
-//     longitude: number
-// }
-
-//declare a type for UserWeather
-
-//declare a a type for UserGeology
-
-// let userInfo = {} as UserInfo;
-let cityCountry = [] as CityCountry;
+let searchableLocations: Location[] = [] as Location[];
+let userLocation: Location = {} as Location;
+let userIPInfo: IPInfo = {} as IPInfo;
 
 
 
@@ -139,44 +74,93 @@ function getAPIInfo(url:string, requestType:string){
 
 }
 
-function formatInformation(data:any): any{
+// function formatGeoInfo(data: GeoInfo): CardInfo[] {
 
-    //data contains an array of objects, function will return an array of objects
-    //representing each card to be sent to the front-end
+//     //data contains an array of objects, function will return an array of objects
+//     //representing each card to be sent to the front-end
 
-    const info = [
-        {
-            cardTitle: "Weather",
-            listItemOne: "Temperature: " + data[1].main.temp,
-            listItemTwo: "Description: " + data[1].weather.description
+//     let cards: CardInfo[] = [];
 
-        }
-    ];
+//     return cards;
 
-    return info;
+// }
+
+function convertUTCToTime(UTCDate:number): string{
+
+    const date = new Date();
+
+    date.setUTCSeconds(UTCDate);
+
+    return date.toTimeString().substring(0, 17);
+
 
 }
 
-//retrieves all information for each API
-async function getInformation(ipAddress: string, city?:string, country?:string, lat?:number, lon?:number){
+function formatWeatherInfo(data: WeatherInfo): Card[] {
 
-    let ipInfo: IPInfo = {} as IPInfo;
+    let cards: Card[] = [];
+
+    const weatherCard: Card = {
+        cardTitle: "Weather",
+        itemList: [
+            data.weather[0].description, 
+            "Temperature: " + data.main.temp,
+            "Temp-Minimum: " + data.main.temp_min,
+            "Temp-Maximum: " + data.main.temp_max,
+            "Humidity : " + data.main.humidity 
+        ]
+    }
+
+
+
+    const timeZoneCard: Card = {
+        cardTitle: "Time-Zone",
+        itemList: [
+            data.name + ", " + data.sys.country,
+            "Latitude: " + data.coord.lat,
+            "Longitude: " + data.coord.lon,
+            "Sunrise: " + convertUTCToTime(data.sys.sunrise), 
+            "Sunset: " + convertUTCToTime(data.sys.sunset)
+        ]
+    }
+
+    const atmosphereCard: Card = {
+        cardTitle: "Atmosphere",
+        itemList: [
+            "Wind Speed: " + data.wind.speed,
+            "Wind Direction: " + data.wind.deg,
+            "Pressure: " + data.main.pressure,
+            "Visibility: " + data.visibility,
+            "Cloudiness: " + data.clouds.all
+        ]
+    }
+
+    cards.push(timeZoneCard);
+    cards.push(weatherCard);
+    cards.push(atmosphereCard);
+
+    return cards;
+}
+
+//retrieves all information for each API
+async function getAllAPIInfo(ipAddress: string, city?:string, country?:string, lat?:number, lon?:number){
 
     //API Call to ip-api if ip-based search supplied
     if(ipAddress !== ""){
         const ipURL:string = "http://ip-api.com/json/" + ipAddress;
-        ipInfo = await getAPIInfo(ipURL, "http") as IPInfo;
+        userIPInfo = await getAPIInfo(ipURL, "http") as IPInfo;
 
-        city = ipInfo.city;
-        country = ipInfo.country;
-        lat = ipInfo.lat;
-        lon = ipInfo.lon;
+        userLocation.city = userIPInfo.city;
+        userLocation.country = userIPInfo.country;
+        userLocation.latitude = userIPInfo.lat;
+        userLocation.longitude = userIPInfo.lon;
+        userLocation.regionName = userIPInfo.regionName;
     }
 
     //API Call to OpenWeatherMap
-    const apiKey = "APIKEYHERE"
-    const weatherURL:string = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&userCountry=" + country + "&appid=" + apiKey + "&units=imperial";
-    const weatherInfo: any = await getAPIInfo(weatherURL, "https");
+    const apiKey: string = "APIKEY"
+    const weatherURL:string = "https://api.openweathermap.org/data/2.5/weather?q=" + (city || String(userLocation.city)) + "&userCountry=" + (country || String(userLocation.country)) + "&appid=" + apiKey + "&units=imperial";
+    const weatherInfo: WeatherInfo = await getAPIInfo(weatherURL, "https") as WeatherInfo;
 
     if(lat === 0 && lon === 0){
         lat = weatherInfo.coord.lat;
@@ -184,10 +168,12 @@ async function getInformation(ipAddress: string, city?:string, country?:string, 
     }
 
     //API Call to Macrostrat (Geology)
-    const geoURL = "https://macrostrat.org/api/geologic_units/map?lat=" + lat + "&lng=" + lon;
-    const geoInfo: any = await getAPIInfo(geoURL, "https");
+    const geoURL: string = "https://macrostrat.org/api/geologic_units/map?lat=" + (lat || String(userLocation.latitude)) + "&lng=" + (lon || String(userLocation.longitude));
+    const geoInfo: GeoInfo = await getAPIInfo(geoURL, "https") as GeoInfo;
 
-    return [ipInfo, weatherInfo, geoInfo];
+    const apiInfo = {userIPInfo, weatherInfo, geoInfo};
+
+    return apiInfo;
 }
 
 
@@ -200,12 +186,12 @@ app.get("/", (_req: express.Request, _res: express.Response)=>{
 
     if(ipAddress){
 
-        getInformation(ipAddress)
-            .then((_data)=>{
-                console.log(_data);
+        getAllAPIInfo(ipAddress, "", "", 0, 0)
+            .then((data)=>{
+                console.log(data);
                 //format the data and render
-                const info:any = formatInformation(_data);
-                _res.render("home", {info: info});
+                const cards: Card[] = formatWeatherInfo(data.weatherInfo);
+                _res.render("home", {cards: cards});
             })
             .catch((error)=>{
                 console.log("There was an error: " + error);
@@ -235,11 +221,11 @@ app.post("/search", (_req: express.Request, _res: express.Response)=>{
         lon = Number(coords[1]);
     }
 
-    getInformation(ipAddress, city, country, lat, lon)
+    getAllAPIInfo(ipAddress, city, country, lat, lon)
         .then((data)=>{
             console.log(data);
-            let info = formatInformation(data);
-            _res.render("home", {info: info});
+            const cards: Card[] = formatWeatherInfo(data.weatherInfo);
+            _res.render("home", {cards: cards});
         })
         .catch((error)=>{
             console.log("There was an error: " + error);
@@ -248,15 +234,20 @@ app.post("/search", (_req: express.Request, _res: express.Response)=>{
 
 app.listen(port, ()=>{
 
-    //API call to countriesnow api to get all countries/cities
+    //API call to countriesnow api to get all searchable locations
     const countriesNowURL: string = "https://countriesnow.space/api/v0.1/countries"
     getAPIInfo(countriesNowURL, "https")
         .then((data: any)=>{
-            data.data.forEach((obj:any)=>{
+            data.data.forEach((location:any)=>{
                 
-                for(let i = 0; i < obj.cities.length; i++){
-                    const input = obj.cities[i] + "," + obj.country;
-                    cityCountry.push(_.replace(input, "\s", ""));
+                for(let i = 0; i < location.cities.length; i++){
+
+                    const locationToInsert: Location = {
+                        city: location.cities[i],
+                        country: location.country
+                    }
+
+                    searchableLocations.push(locationToInsert)
                 }
 
             });
