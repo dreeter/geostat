@@ -106,7 +106,6 @@ export type GeoInfo =
  export type Location = {
         city: string,
         country: string,
-        latitude?: number,
-        longitude?: number,
-        regionName?: string
-}
+        iso2: string,
+        iso3: string
+ }
