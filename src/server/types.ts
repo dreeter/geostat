@@ -16,11 +16,6 @@ export type IPInfo = {
     query: string
  }
 
- export type Card = {
-    cardTitle: string,
-    itemList: string[];
- }
-
  export type WeatherInfo = {
     coord: {
         lon: number,
@@ -104,8 +99,8 @@ export type GeoInfo =
 }
 
  export type Location = {
+        cityState: string,
         city: string,
-        country: string,
-        iso2: string,
-        iso3: string
+        state: string,
+        country: string
  }

@@ -39,10 +39,11 @@ const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const https_1 = __importDefault(require("https"));
 const http = __importStar(require("http"));
+const fs = __importStar(require("fs"));
+let locations = [];
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.urlencoded({ extended: true }));
 const port = 3000;
-let locations = [];
 function getAPIInfo(url, requestType) {
     return new Promise((resolve, reject) => {
         if (requestType === "https") {
@@ -77,48 +78,37 @@ function getAPIInfo(url, requestType) {
 }
 app.get("/weather", (_req, _res) => __awaiter(void 0, void 0, void 0, function* () {
     const city = String(_req.query.city);
-    const country = String(_req.query.country);
+    const state = String(_req.query.state);
     const apiKey = "APIKEYHERE";
-    const weatherURL = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "," + country + "&appid=" + apiKey + "&units=imperial";
+    const weatherURL = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "," + state + "&appid=" + apiKey + "&units=imperial";
     const weatherInfo = yield getAPIInfo(weatherURL, "https");
     console.log("The weather info: ", weatherInfo);
     _res.send(JSON.stringify(weatherInfo));
 }));
 app.get("/geology", (_req, _res) => __awaiter(void 0, void 0, void 0, function* () {
-    const latitude = _req.query.latitude;
-    const longitude = _req.query.longitude;
-    const geoURL = "https://macrostrat.org/api/geologic_units/map?lat=" + latitude + "&lng=" + String(longitude);
+    const latitude = String(_req.query.latitude);
+    const longitude = String(_req.query.longitude);
+    const geoURL = "https://macrostrat.org/api/geologic_units/map?lat=" + latitude + "&lng=" + longitude;
     const geoInfo = yield getAPIInfo(geoURL, "https");
+    console.log("The geology info: ", geoInfo);
     _res.send(JSON.stringify(geoInfo));
 }));
 app.get("/locations", (_req, _res) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = fs.readFileSync(__dirname + "/city-list.json");
+    locations = JSON.parse(data);
     const response = {
         locations: locations
     };
     _res.send(JSON.stringify(response));
 }));
-app.use(express_1.default.static('public'));
+app.use(express_1.default.static(__dirname + "/../../dist/client/components"));
+app.use(express_1.default.static(__dirname + "/../../dist/client/css"));
+app.use(express_1.default.static(__dirname + "/../../dist/client/scripts"));
+app.use(express_1.default.static(__dirname + "/../../dist/client/images"));
+app.use(express_1.default.static(__dirname + "/../../dist/client/partials"));
 app.get("/", (_req, _res) => {
-    _res.send();
 });
 app.listen(port, () => {
-    const countriesNowURL = "https://countriesnow.space/api/v0.1/countries/";
-    getAPIInfo(countriesNowURL, "https")
-        .then((data) => {
-        data.data.forEach((location) => {
-            for (let i = 0; i < location.cities.length; i++) {
-                const locationToInsert = {
-                    city: location.cities[i],
-                    country: location.country,
-                    iso2: location.iso2,
-                    iso3: location.iso3
-                };
-                locations.push(locationToInsert);
-            }
-        });
-    })
-        .catch((error) => {
-        console.log(error);
-    });
+    console.log("Listening");
 });
 //# sourceMappingURL=server.js.map
