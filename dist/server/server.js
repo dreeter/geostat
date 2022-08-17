@@ -38,42 +38,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const https_1 = __importDefault(require("https"));
-const http = __importStar(require("http"));
 const fs = __importStar(require("fs"));
 let locations = [];
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.urlencoded({ extended: true }));
 const port = 3000;
-function getAPIInfo(url, requestType) {
+function getAPIInfo(url) {
     return new Promise((resolve, reject) => {
-        if (requestType === "https") {
-            https_1.default.get(url, (response) => {
-                if (response.statusCode !== 200) {
-                    reject("Invalid Response Code: " + response.statusCode + "from " + url);
-                }
-                let responseData = "";
-                response.on("data", (data) => {
-                    responseData += data;
-                });
-                response.on("end", () => {
-                    resolve(JSON.parse(responseData));
-                });
+        https_1.default.get(url, (response) => {
+            if (response.statusCode !== 200) {
+                reject("Invalid Response Code: " + response.statusCode + "from " + url);
+            }
+            let responseData = "";
+            response.on("data", (data) => {
+                responseData += data;
             });
-        }
-        else {
-            http.get(url, (response) => {
-                if (response.statusCode !== 200) {
-                    reject("Invalid Response Code: " + response.statusCode + "from " + url);
-                }
-                let responseData = "";
-                response.on("data", (data) => {
-                    responseData += data;
-                });
-                response.on("end", () => {
-                    resolve(JSON.parse(responseData));
-                });
+            response.on("end", () => {
+                resolve(JSON.parse(responseData));
             });
-        }
+        });
     });
 }
 app.get("/weather", (_req, _res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -81,16 +64,14 @@ app.get("/weather", (_req, _res) => __awaiter(void 0, void 0, void 0, function* 
     const state = String(_req.query.state);
     const apiKey = "APIKEYHERE";
     const weatherURL = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "," + state + "&appid=" + apiKey + "&units=imperial";
-    const weatherInfo = yield getAPIInfo(weatherURL, "https");
-    console.log("The weather info: ", weatherInfo);
+    const weatherInfo = yield getAPIInfo(weatherURL);
     _res.send(JSON.stringify(weatherInfo));
 }));
 app.get("/geology", (_req, _res) => __awaiter(void 0, void 0, void 0, function* () {
     const latitude = String(_req.query.latitude);
     const longitude = String(_req.query.longitude);
-    const geoURL = "https://macrostrat.org/api/geologic_units/map?lat=" + latitude + "&lng=" + longitude;
-    const geoInfo = yield getAPIInfo(geoURL, "https");
-    console.log("The geology info: ", geoInfo);
+    const geoURL = "https://macrostrat.org/api/geologic_units/map?lat=" + latitude + "&lng=" + longitude + "&scale=medium";
+    const geoInfo = yield getAPIInfo(geoURL);
     _res.send(JSON.stringify(geoInfo));
 }));
 app.get("/locations", (_req, _res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -105,10 +86,9 @@ app.use(express_1.default.static(__dirname + "/../../dist/client/components"));
 app.use(express_1.default.static(__dirname + "/../../dist/client/css"));
 app.use(express_1.default.static(__dirname + "/../../dist/client/scripts"));
 app.use(express_1.default.static(__dirname + "/../../dist/client/images"));
-app.use(express_1.default.static(__dirname + "/../../dist/client/partials"));
+app.use(express_1.default.static(__dirname + "/../../dist/client/templates"));
 app.get("/", (_req, _res) => {
 });
 app.listen(port, () => {
-    console.log("Listening");
 });
 //# sourceMappingURL=server.js.map

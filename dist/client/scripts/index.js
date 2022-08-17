@@ -14,7 +14,6 @@ let searchStrings = [];
 
 
 
-
 document.addEventListener("DOMContentLoaded", async ()=>{
 
     // An initial one time AJAX request for the client's city/state/lat/lon so current location's weather and geology is displayed
@@ -38,30 +37,29 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
     document.getElementById("location-search-input").addEventListener("keyup", showSearchResults);
     document.getElementById("search-form").addEventListener("submit", search);
-    document.getElementById("searchItems").addEventListener("click", search);
-    document.getElementById("my-locations").addEventListener("click", showLocations);
+    document.getElementById("search-items").addEventListener("click", search);
+    //document.getElementById("my-locations").addEventListener("click", showLocations);
+
     
     //set a cookie with a stored location
     //document.cookie = "location=New York, NY";
 
-    console.log(document.cookie);
+    // console.log(document.cookie);
 
-    let locationCookie = document.cookie.split("=");
+    // let locationCookie = document.cookie.split("=");
 
-    let location = locationCookie[1].split(",");
+    // let location = locationCookie[1].split(",");
 
-    let city = location[0];
-    let state = location[1];
+    // let city = location[0];
+    // let state = location[1];
 
 
-    searchInfo.city = city;
-    searchInfo.state = state;
+    // searchInfo.city = city;
+    // searchInfo.state = state;
 
 });
 
-function showLocations(){
-    window.alert("Showing locations");
-}
+
 
 ////////////////////////
 // SEARCH FUNCTIONALITY
@@ -93,21 +91,23 @@ async function search(event) {
 
 function resetSearch(){
     document.getElementById("search-form").reset();
-    document.getElementById("searchItems").innerHTML = "";
+    document.getElementById("search-items").innerHTML = "";
 }
 
 async function displaySearchData(city, state, latitude, longitude){
     const userWeatherInfo = await getWeatherInfo(city, state, latitude, longitude);
-    const userGeologyInfo = await getGeologyInfo(latitude, longitude);
+    const userGeologyInfo = await getGeologyInfo(userWeatherInfo.coord.lat, userWeatherInfo.coord.lon);
 
     //Format the data recieved from the weather and geology apis
-    const weatherCards = util.formatWeatherInfo(userWeatherInfo);
-    //const geologyCards = util.formatGeologyInfo(userGeologyInfo);
+    const weatherCards = formatWeatherInfo(userWeatherInfo);
+    const geologyCards = formatGeologyInfo(userGeologyInfo);
 
     console.log(weatherCards);
+    console.log(geologyCards);
 
     document.getElementById("location-container").innerHTML = await util.render("card.mustache", weatherCards);
-    document.getElementById("geology-container").innerHTML = await util.render("card.mustache", weatherCards);
+    
+    document.getElementById("geology-container").innerHTML = await util.render("geocard.mustache", geologyCards);
 }
 
 function autocompleteMatch(input) {
@@ -137,7 +137,7 @@ async function showSearchResults(event) {
         }
     }
 
-    document.getElementById("searchItems").innerHTML = await util.render("searchItem.mustache", {searchItems: results});
+    document.getElementById("search-items").innerHTML = await util.render("searchItem.mustache", {searchItems: results});
 
 }
 
@@ -154,7 +154,7 @@ function setSearchInfo(city, state, lat, lon){
 async function updateWeatherInfo(){
 
     const userWeatherInfo = await getWeatherInfo(searchInfo.city, searchInfo.state, searchInfo.latitude, searchInfo.longitude);
-    const weatherCards = util.formatWeatherInfo(userWeatherInfo);
+    const weatherCards = formatWeatherInfo(userWeatherInfo);
     document.getElementById("location-container").innerHTML = await util.render("card.mustache", weatherCards);
 }
 
@@ -210,6 +210,83 @@ async function getGeologyInfo(latitude, longitude) {
     const userGeologyInfo = await response.json();
 
     return userGeologyInfo;
+}
+
+
+export function formatWeatherInfo(data) {
+
+    let cards = {
+        cards: []
+    };
+
+    const weatherCard = {
+        cardTitle: "Weather",
+        cardImage: "http://openweathermap.org/img/wn/" + data.weather[0].icon + "@2x.png",
+        cardItems: [
+            data.weather[0].description, 
+            "Temperature: " + data.main.temp + " F",
+            "Temp-Minimum: " + data.main.temp_min + " F",
+            "Temp-Maximum: " + data.main.temp_max + " F",
+            "Humidity : " + data.main.humidity + "%"
+        ]
+    }
+
+
+
+    const timeZoneCard = {
+        cardTitle: "Time-Zone",
+        cardImage: "/location.png",
+        cardItems: [
+            data.name + ", " + data.sys.country,
+            "Latitude: " + data.coord.lat,
+            "Longitude: " + data.coord.lon,
+            "Sunrise: " + util.convertUTCToTime(data.sys.sunrise), 
+            "Sunset: " + util.convertUTCToTime(data.sys.sunset)
+        ]
+    }
+
+    const atmosphereCard = {
+        cardTitle: "Atmosphere",
+        cardImage: "/barometer.png",
+        cardItems: [
+            "Wind Speed: " + data.wind.speed + " mph",
+            "Wind Direction: " + data.wind.deg + " degrees",
+            "Pressure: " + data.main.pressure + " hPa",
+            "Visibility: " + data.visibility + " meters",
+            "Cloudiness: " + data.clouds.all + "%"
+        ]
+    }
+
+    cards.cards.push(timeZoneCard);
+    cards.cards.push(weatherCard);
+    cards.cards.push(atmosphereCard);
+
+    return cards;
+}
+
+
+export function formatGeologyInfo(data) {
+
+    let cards = {
+        cards: []
+    };
+
+    const unitCard = {
+        cardTitle: "Geology",
+        cardImage: "/rock.png",
+        cardItems: [
+            "Unit Name: " + data.success.data[0].name,
+            "Lithology: " + data.success.data[0].lith,
+            "Top-Age: " + data.success.data[0].t_int_age,
+            "Bottom-Age: " + data.success.data[0].b_int_age,
+            "Description: " + data.success.data[0].descrip
+        ]
+    }
+
+
+    cards.cards.push(unitCard);
+
+    return cards;
 }
 
 

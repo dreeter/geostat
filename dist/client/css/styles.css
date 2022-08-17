@@ -1,23 +1,17 @@
-.card-img-top {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
 
 .container-fluid {
-    margin-top: 2em;
+    margin-top: 4px;
 }
 
+#search-items {
+    margin-bottom: 4px;
+}
 
 
 @media (min-width: 769px){
 
     input {
         width: 514px !important;
-    }
-
-    ul {
-        margin-right: 5em;
     }
 
 }
@@ -29,23 +23,24 @@
         width: 370px !important;
     }
 
-    ul {
-        margin-right: 5em;
-    }
+}
 
+body {
+    text-transform: capitalize;
 }
 
 .dropdown-menu {
     position: absolute !important;
 }
 
-.searchItem {
+.search-item {
     display: inline;
-    margin: 2px, 4px, 0px, 4px;
+    margin: 0;
 }
 
-.no-bullets{
+#search-items {
     list-style-type: none;
+    margin: 0;
 }
 
 .navbar-nav{
@@ -54,4 +49,116 @@
 
 .inline{
     display: inline;
+}
+
+.card {
+    flex-direction: row !important;
+}
+
+@media (min-width: 992px) {
+
+    #geology-container .card img {
+        /* width:auto;
+        height: auto; */
+    }
+    #location-container .card img {
+        /* width:auto;
+        height: auto; */
+    }
+
+}
+
+@media (max-width: 991px) {
+
+    #geology-container .card img {
+        /* width:auto;
+        height: auto; */
+    }
+    #location-container .card img {
+        /* width:auto;
+        height: auto; */
+
+    }
+
+}
+
+
+.row {
+    margin-left: 1px;
+    margin-right: 5px;
+    margin-top: 0px;
+    display: inline;
+}
+
+.col-lg-4, .col-sm-12 {
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
+
+#location-container ul {
+    list-style: none;
+    padding-left: 10px;
+}
+
+#geology-container ul {
+    list-style: none;
+    padding-left: 10px;
+}
+
+img {
+    /* background: lightgrey;
+    padding: 73px 43px 73px 43px; */
+    width: 100px;
+    height: 100px;
+    /* margin-top: 55px;
+    margin-left: 15px; */
+    display: block;
+    margin: 20px auto auto auto;
+}
+
+img[src*="/barometer.png"] {
+    padding: 22px;
+} 
+
+img[src*="/location.png"] {
+    padding: 17px;
+}
+
+img[src*="/rock.png"] {
+    padding: 10px;
+} 
+
+li {
+    margin-top: 8px;
+}
+
+span {
+    margin-left: 20px;
+}
+
+.orange-text {
+    color: #E67E22 !important;
+}
+
+input:focus{
+    border:1px solid #E67E22 !important;
+    box-shadow: 0 0 2px #E67E22 !important;
+}
+
+/* Solid border */
+hr.solid {
+    border-top: 3px solid #E67E22;
+}
+
+#site-icon {
+    width: 30px;
+    height: 30px;
+    margin: 0px;
+}
+
+ul {
+    padding-inline-start: 0px;
 }

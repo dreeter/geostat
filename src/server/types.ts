@@ -61,10 +61,9 @@ export type IPInfo = {
     cod: number
 }
 
-export type GeoInfo =
-{
+export type GeoInfo = {
     success: {
-        v: 2,
+        v: number,
         license: string,
         data: [
             {
@@ -95,6 +94,25 @@ export type GeoInfo =
             133: string,
             154: string
         }
+    }
+}
+
+export type LithologyInfo = {
+    success: {
+        v: number,
+        license: string,
+        data: [
+            {
+                lith_id: number,
+                name: string,
+                type: string,
+                group: string,
+                class: string,
+                color: string,
+                fill: number,
+                t_units: number
+            }
+        ]
     }
 }
 

@@ -1,5 +1,6 @@
 "use strict";
 
+import * as util from "/util.js";
 
 const searchInfo = {
     city: "",
@@ -11,19 +12,17 @@ const searchInfo = {
 let searchableLocations = [];
 let searchStrings = [];
 
-import * as util from "../utils/util.js";
 
 
 document.addEventListener("DOMContentLoaded", async ()=>{
 
-    // An initial one time AJAX request for the client's city/state/lat/lon so relevant weather and geology can be given
-    // without the need for a user to search.
+    // An initial one time AJAX request for the client's city/state/lat/lon so current location's weather and geology is displayed
     const userLocationInfo = await getUserLocationInfo();
     setSearchInfo(userLocationInfo.city, userLocationInfo.region, userLocationInfo.lat, userLocationInfo.lon);
 
     await displaySearchData(userLocationInfo.city, userLocationInfo.region, userLocationInfo.lat, userLocationInfo.lon);
 
-    // weather information for the current search will update automatically
+    // set weather information for the current search to update automatically
     window.setInterval(updateWeatherInfo, 20000);
 
 
@@ -36,115 +35,109 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     });
 
 
-    document.getElementById("location-search-input").addEventListener("keyup", showResults);
+    document.getElementById("location-search-input").addEventListener("keyup", showSearchResults);
+    document.getElementById("search-form").addEventListener("submit", search);
+    document.getElementById("search-items").addEventListener("click", search);
+    //document.getElementById("my-locations").addEventListener("click", showLocations);
 
-
-    //search form submission
-    document.getElementById("search-form").addEventListener("submit", async (event)=>{
-
-        event.preventDefault();
-
-        let search = document.getElementById("location-search-input").value;
-
-        //value will be enforced at City, Country
-        //remove white spaces, split on "," and search on city,country to pass city, ISO2 to the weather api
-
-        let input = search.split(",");
-
-        let city = input[0];
-        let state = input[1];
-
-        
-        console.log("city: ", city, "state: ", state);
-
-        await displaySearchData(city, state, 0, 0);
-
-        searchInfo.city = city;
-        searchInfo.state = state;
-
-        document.getElementById("search-form").reset();
-        document.getElementById("searchItems").innerHTML = "";
-
-    });
-
-
-    document.getElementById("searchItems").addEventListener("click", async (event)=>{
-        
-        if(event.target && event.target.nodeName === "BUTTON"){
-            
-            let input = event.target.innerText;
-
-            input = input.split(",");
-
-            let city = input[0];
-            let state = input[1];
-
-            await displaySearchData(city, state, 0, 0);
     
-            searchInfo.city = city;
-            searchInfo.state = state;
-    
-            document.getElementById("search-form").reset();
-            document.getElementById("searchItems").innerHTML = "";
+    //set a cookie with a stored location
+    //document.cookie = "location=New York, NY";
 
-        }
-    });
-    
+    // console.log(document.cookie);
 
+    // let locationCookie = document.cookie.split("=");
+
+    // let location = locationCookie[1].split(",");
+
+    // let city = location[0];
+    // let state = location[1];
+
+
+    // searchInfo.city = city;
+    // searchInfo.state = state;
 
 });
 
-function formatSearchInput(input){
 
+
+////////////////////////
+// SEARCH FUNCTIONALITY
+////////////////////////
+async function search(event) {
+
+    event.preventDefault();
+
+    if(event.target.nodeName === "BUTTON"){
+
+        document.getElementById("location-search-input").value = event.target.innerText;
+    }
+
+    const searchInput = document.getElementById("location-search-input").value.split(",");
+
+    console.log(searchInput);
+
+    const city = searchInput[0];
+    const state = searchInput[1];
+
+    await displaySearchData(city, state, 0, 0);
+
+    searchInfo.city = city;
+    searchInfo.state = state;
+
+    resetSearch();
 }
 
+
 function resetSearch(){
-    
+    document.getElementById("search-form").reset();
+    document.getElementById("search-items").innerHTML = "";
 }
 
 async function displaySearchData(city, state, latitude, longitude){
     const userWeatherInfo = await getWeatherInfo(city, state, latitude, longitude);
-    //const userGeologyInfo = await getWeatherInfo(city, country, 0, 0);
+    const userGeologyInfo = await getGeologyInfo(userWeatherInfo.coord.lat, userWeatherInfo.coord.lon);
 
     //Format the data recieved from the weather and geology apis
-    const weatherCards = util.formatWeatherInfo(userWeatherInfo);
-    //const geologyCards = util.formatGeologyInfo(userGeologyInfo);
+    const weatherCards = formatWeatherInfo(userWeatherInfo);
+    const geologyCards = formatGeologyInfo(userGeologyInfo);
 
     console.log(weatherCards);
+    console.log(geologyCards);
 
     document.getElementById("location-container").innerHTML = await util.render("card.mustache", weatherCards);
-    //document.getElementById("geology-container").innerHTML = util.render("card.mustache", geologyCards);
+    
+    document.getElementById("geology-container").innerHTML = await util.render("geocard.mustache", geologyCards);
 }
 
 function autocompleteMatch(input) {
-  if (input === "") {
-    return [];
-  }
-  const reg = new RegExp(input)
-  return searchStrings.filter(function(term) {
-	  if (term.match(reg)) {
-  	    return term;
+
+  const regex = new RegExp(input)
+
+  return searchStrings.filter(function(location) {
+	  if (location.match(regex)) {
+  	    return location;
 	  }
   });
+
 }
 
-async function showResults(val) {
-  val = this.value;
+async function showSearchResults(event) {
 
-  let list = [];
+    const input = this.value;
 
-  if(val.length > 3){
+    let results = [];
 
-    let terms = autocompleteMatch(val);
-    for (let i=0; i < Math.min(terms.length, 5); i++) {
-      list.push(terms[i]);
+    if(input.length > 3){
+
+        let matches = autocompleteMatch(input);
+        for (let i = 0; i < Math.min(matches.length, 4); i++) {
+            
+            results.push(matches[i]);
+        }
     }
 
-    console.log("The list ", list);
-    document.getElementById("searchItems").innerHTML = await util.render("searchItem.mustache", {searchItems: list});
-  } else {
-    document.getElementById("searchItems").innerHTML = await util.render("searchItem.mustache", {searchItems: list});
-  }
+    document.getElementById("search-items").innerHTML = await util.render("searchItem.mustache", {searchItems: results});
 
 }
 
@@ -161,9 +154,12 @@ function setSearchInfo(city, state, lat, lon){
 async function updateWeatherInfo(){
 
     const userWeatherInfo = await getWeatherInfo(searchInfo.city, searchInfo.state, searchInfo.latitude, searchInfo.longitude);
-    const weatherCards = util.formatWeatherInfo(userWeatherInfo);
+    const weatherCards = formatWeatherInfo(userWeatherInfo);
     document.getElementById("location-container").innerHTML = await util.render("card.mustache", weatherCards);
 }
+
+
+
 
 async function getLocations(){
 
@@ -214,6 +210,83 @@ async function getGeologyInfo(latitude, longitude) {
     const userGeologyInfo = await response.json();
 
     return userGeologyInfo;
+}
+
+
+export function formatWeatherInfo(data) {
+
+    let cards = {
+        cards: []
+    };
+
+    const weatherCard = {
+        cardTitle: "Weather",
+        cardImage: "http://openweathermap.org/img/wn/" + data.weather[0].icon + "@2x.png",
+        cardItems: [
+            data.weather[0].description, 
+            "Temperature: " + data.main.temp + " F",
+            "Temp-Minimum: " + data.main.temp_min + " F",
+            "Temp-Maximum: " + data.main.temp_max + " F",
+            "Humidity : " + data.main.humidity + "%"
+        ]
+    }
+
+
+
+    const timeZoneCard = {
+        cardTitle: "Time-Zone",
+        cardImage: "/location.png",
+        cardItems: [
+            data.name + ", " + data.sys.country,
+            "Latitude: " + data.coord.lat,
+            "Longitude: " + data.coord.lon,
+            "Sunrise: " + util.convertUTCToTime(data.sys.sunrise), 
+            "Sunset: " + util.convertUTCToTime(data.sys.sunset)
+        ]
+    }
+
+    const atmosphereCard = {
+        cardTitle: "Atmosphere",
+        cardImage: "/barometer.png",
+        cardItems: [
+            "Wind Speed: " + data.wind.speed + " mph",
+            "Wind Direction: " + data.wind.deg + " degrees",
+            "Pressure: " + data.main.pressure + " hPa",
+            "Visibility: " + data.visibility + " meters",
+            "Cloudiness: " + data.clouds.all + "%"
+        ]
+    }
+
+    cards.cards.push(timeZoneCard);
+    cards.cards.push(weatherCard);
+    cards.cards.push(atmosphereCard);
+
+    return cards;
+}
+
+
+export function formatGeologyInfo(data) {
+
+    let cards = {
+        cards: []
+    };
+
+    const unitCard = {
+        cardTitle: "Geology",
+        cardImage: "/rock.png",
+        cardItems: [
+            "Unit Name: " + data.success.data[0].name,
+            "Lithology: " + data.success.data[0].lith,
+            "Top-Age: " + data.success.data[0].t_int_age,
+            "Bottom-Age: " + data.success.data[0].b_int_age,
+            "Description: " + data.success.data[0].descrip
+        ]
+    }
+
+
+    cards.cards.push(unitCard);
+
+    return cards;
 }
 
 

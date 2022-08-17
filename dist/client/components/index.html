@@ -8,62 +8,67 @@
     <!-- CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" type="image/x-icon" href="planet.png">
     <title>GeoStat</title>
   </head>
   <body>
 
-    <nav class="navbar navbar-light bg-light">
-        <a class="navbar-brand" href="#">GeoStat</a>
+    <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand orange-text" href="">
+          <img id="site-icon" src="planet.png" alt="planet-icon" class="d-inline-block align-top">
+          GeoStat
+        </a>
 
                 <ul class="navbar-nav navbar-nav-left-side">
 
-                    <li class="nav-item dropdown mr-3 ml-2">
-                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Units
-                      </a>
-                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Metric</a>
-                        <a class="dropdown-item" href="#">Imperial</a>
-                      </div>
+                    <li class="nav-item dropdown mr-5 ml-2">
 
-                      <li class="nav-item dropdown mr-3 ml-2">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <li class="nav-item dropdown mr-5">
+                        <a id="my-locations" class="nav-link dropdown-toggle orange-text" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                           My Locations
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                          <a class="dropdown-item" href="#">Metric</a>
-                          <a class="dropdown-item" href="#">Imperial</a>
+                          <a class="dropdown-item orange-text" href="#">Location 1</a>
+                          <a class="dropdown-item orange-text" href="#">Location 2</a>
                         </div>
                     </li>
                 </ul>
       </nav>
 
-      <form id="search-form" method="post" action="index.js" class="form-inline mr-3 ml-3" autocomplete="off">
-        <div class="form-group mx-sm-3 mb-2">
-            <input id="location-search-input" name="locationSearch" type="search" class="form-control" autocomplete="off" placeholder="City, State" required>
+      <form id="search-form" method="post" action="index.js" class="form-inline mt-3 mr-3 ml-2" autocomplete="off">
+        <div class="form-group ml-2 mb-2">
+            <input id="location-search-input" name="locationSearch" type="search" class="form-control" autocomplete="off" placeholder="City, State" autofocus="true" required>
         </div>
         <div id="result">
 
         </div>
-        <button id="submit-button" type="submit" class="btn btn-secondary mb-2">Search</button>
+        <button id="submit-button" type="submit" class="btn btn-success mb-2">Search</button>
       </form>
 
-      <div>
-        <ul id="searchItems">
-
-        </ul>
-      </div>
           <!-- Boostrap Grid for Display of Weather Data -->
-    <div class="container-fluid">
+    <div id="content-container" class="container-fluid">
 
-        <button id="add-location-btn" type="submit" class="btn btn-success btn-circle btn-sm mb-2 mr-3">Add Location</button>
+        <div>
+          <ul id="search-items">
 
-        <div id="location-container" class="row justify-content-center">
-
+          </ul>
         </div>
 
-        <div id="geology-container" class="row justify-content-center">
+        <div class="row">
+          <button id="add-location-btn" type="submit" class="btn btn-success btn-circle btn-sm mb-2">Add Location</button>
+        </div>
 
+
+        <div class="row ml-2 mt-2">
+          <div id="location-container" class="card-deck justify-content-center">
+
+          </div>
+        </div>
+
+        <div class="row ml-2 mt-4">
+          <div id="geology-container" class="card-deck justify-content-center">
+
+          </div>
         </div>
   
     </div>
