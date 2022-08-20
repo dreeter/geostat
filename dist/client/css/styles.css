@@ -25,10 +25,6 @@
 
 }
 
-body {
-    text-transform: capitalize;
-}
-
 .dropdown-menu {
     position: absolute !important;
 }
@@ -133,6 +129,7 @@ img[src*="/rock.png"] {
 
 li {
     margin-top: 8px;
+    text-transform: capitalize;
 }
 
 span {
@@ -161,4 +158,46 @@ hr.solid {
 
 ul {
     padding-inline-start: 0px;
+}
+
+#footer {
+    background-color: #6c757d;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 2rem;
+    text-align: center;
+}
+
+#page-container {
+    position: relative;
+    min-height: 100vh;
+}
+
+#content-wrap {
+    padding-bottom: 2rem;
+}
+
+.white-text {
+    color: #fff;
+}
+
+#cookie-footer {
+    position: fixed;
+    z-index: 5000;
+    background-color: #6c757d;
+    border:1px solid #E67E22 !important;
+    box-shadow: 0 0 3px #E67E22 !important;
+    width: 100%;
+    height: 10rem;
+    bottom: 0;
+    text-align:left;
+}
+
+.cookie-text {
+    margin: 1em 1em 0em 5em;
+}
+
+#cookie-accept-btn {
+    margin: 1em 1em 1em 7em;
 }

@@ -13,64 +13,71 @@
   </head>
   <body>
 
-    <nav class="navbar navbar-dark bg-dark">
-        <a class="navbar-brand orange-text" href="">
-          <img id="site-icon" src="planet.png" alt="planet-icon" class="d-inline-block align-top">
-          GeoStat
-        </a>
-
-                <ul class="navbar-nav navbar-nav-left-side">
-
-                    <li class="nav-item dropdown mr-5 ml-2">
-
-                      <li class="nav-item dropdown mr-5">
-                        <a id="my-locations" class="nav-link dropdown-toggle orange-text" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          My Locations
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                          <a class="dropdown-item orange-text" href="#">Location 1</a>
-                          <a class="dropdown-item orange-text" href="#">Location 2</a>
-                        </div>
-                    </li>
-                </ul>
-      </nav>
-
-      <form id="search-form" method="post" action="index.js" class="form-inline mt-3 mr-3 ml-2" autocomplete="off">
-        <div class="form-group ml-2 mb-2">
-            <input id="location-search-input" name="locationSearch" type="search" class="form-control" autocomplete="off" placeholder="City, State" autofocus="true" required>
-        </div>
-        <div id="result">
-
-        </div>
-        <button id="submit-button" type="submit" class="btn btn-success mb-2">Search</button>
-      </form>
-
-          <!-- Boostrap Grid for Display of Weather Data -->
-    <div id="content-container" class="container-fluid">
-
-        <div>
-          <ul id="search-items">
-
-          </ul>
-        </div>
-
-        <div class="row">
-          <button id="add-location-btn" type="submit" class="btn btn-success btn-circle btn-sm mb-2">Add Location</button>
-        </div>
-
-
-        <div class="row ml-2 mt-2">
-          <div id="location-container" class="card-deck justify-content-center">
-
-          </div>
-        </div>
-
-        <div class="row ml-2 mt-4">
-          <div id="geology-container" class="card-deck justify-content-center">
-
-          </div>
-        </div>
+    <div id="page-container">
+      <div id="content-wrap">
+        <nav class="navbar navbar-dark bg-dark">
+          <a class="navbar-brand orange-text" href="">
+            <img id="site-icon" src="planet.png" alt="planet-icon" class="d-inline-block align-top">
+            GeoStat
+          </a>
   
+                  <ul class="navbar-nav navbar-nav-left-side">
+  
+                      <li class="nav-item dropdown mr-5 ml-2">
+  
+                        <li class="nav-item dropdown mr-5">
+                          <a id="my-locations" class="nav-link dropdown-toggle orange-text" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            My Locations
+                          </a>
+                          <div id="my-location-items" class="dropdown-menu" aria-labelledby="navbarDropdown">
+  
+                          </div>
+                      </li>
+                  </ul>
+        </nav>
+  
+        <form id="search-form" method="post" action="index.js" class="form-inline mt-3 mr-3 ml-2" autocomplete="off">
+          <div class="form-group ml-2 mb-2">
+              <input id="location-search-input" name="locationSearch" type="search" class="form-control" autocomplete="off" placeholder="City, State" autofocus="true" required>
+          </div>
+          <div id="result">
+  
+          </div>
+          <button id="submit-button" type="submit" class="btn btn-success mb-2">Search</button>
+        </form>
+  
+            <!-- Boostrap Grid for Display of Weather Data -->
+      <div id="content-container" class="container-fluid">
+  
+          <div>
+            <ul id="search-items">
+  
+            </ul>
+          </div>
+  
+          <div class="row">
+            <button id="add-location-btn" type="submit" class="btn btn-success btn-circle btn-sm mb-2">Add Location</button>
+          </div>
+  
+  
+          <div class="row ml-2 mt-2">
+            <div id="location-container" class="card-deck justify-content-center">
+  
+            </div>
+          </div>
+  
+          <div class="row ml-2 mt-4">
+            <div id="geology-container" class="card-deck justify-content-center">
+  
+            </div>
+          </div>
+    
+      </div>
+      </div>
+
+      <footer id="footer">
+        <p id="footer-text" class="orange-text">Built with <a class="white-text" href="https://openweathermap.org/" target="_blank">OpenWeather</a> and <a class="white-text" href="https://macrostrat.org/" target="_blank">Macrostrat</a> </p>
+      </footer>
     </div>
 
 

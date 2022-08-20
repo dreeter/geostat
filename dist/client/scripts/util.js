@@ -1,6 +1,6 @@
 
 
-export function convertUTCToTime(UTCDate){
+function convertUTCToTime(UTCDate){
 
     const date = new Date();
 
@@ -11,21 +11,20 @@ export function convertUTCToTime(UTCDate){
 
 }
 
+async function renderMustacheTemplate(file, value){
 
-export async function render(templateFile, value){
+    const template = await getMustacheTemplate(file);
+    const renderedHTML = Mustache.render(template, value);
 
-    const template = await getTemplate(templateFile);
-    const rendered = Mustache.render(template, value);
-
-    return rendered;
+    return renderedHTML;
 }
 
-async function getTemplate(file){
+async function getMustacheTemplate(file){
 
     const response = await fetch(file);
-
     const template = await response.text();
 
     return template;
-
 }
+
+export {convertUTCToTime, renderMustacheTemplate}
